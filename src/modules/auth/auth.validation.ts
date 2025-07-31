@@ -1,10 +1,7 @@
 import z from "zod";
 
-export const registerUserZodSchema = z.object({
-    name: z
-        .string({ error: "Name must be string" })
-        .min(2, { message: "Name must be at least 2 characters long." })
-        .max(50, { message: "Name cannot exceed 50 characters." }),
+
+export const loginZodSchema = z.object({
     phone: z
         .string({ error: "Phone number is required" })
         .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
