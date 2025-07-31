@@ -3,8 +3,6 @@ import { IUser, UserStatus } from "../user/user.interface"
 import { User } from "../user/user.model"
 import statusCode from 'http-status-codes';
 import bcryptjs from 'bcryptjs';
-import { Wallet } from "../walet/wallet.model";
-import { WalletStatus } from "../walet/wallet.interface";
 import { createUserToken } from "../../utils/userToken";
 
 const login = async (payload: Partial<IUser>) => {
@@ -18,10 +16,6 @@ const login = async (payload: Partial<IUser>) => {
     const isPasswordMatch = await bcryptjs.compare(payload.password as string, isUserExist.password);
     if (!isPasswordMatch) {
         throw new AppError(statusCode.UNAUTHORIZED, 'Wrong Password');
-    }
-    const userWallet = await Wallet.findOne({ user: isUserExist._id });
-    if (userWallet?.status === WalletStatus.BLOCKED) {
-        throw new AppError(statusCode.FORBIDDEN, 'Your wallet is blocked');
     }
 
     const userToken = createUserToken(isUserExist);
