@@ -2,7 +2,7 @@ import { Router } from "express";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validationRequest";
-import { cashOutZodSchema, sendMoneyZodSchema } from "./wallet.validation";
+import { cashInZodSchema, cashOutZodSchema, sendMoneyZodSchema } from "./wallet.validation";
 import { WalletController } from "./wallet.controller";
 
 
@@ -17,6 +17,11 @@ router.post('/cash-out',
     checkAuth(Role.USER),
     validateRequest(cashOutZodSchema),
     WalletController.cashOut);
+
+router.post('/cash-in',
+    checkAuth(Role.AGENT),
+    validateRequest(cashInZodSchema),
+    WalletController.cashIn);
 
 
 export const WalletRoutes = router;

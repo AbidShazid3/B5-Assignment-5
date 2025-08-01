@@ -145,7 +145,77 @@ const cashOut = async (decodedToken: Record<string, any>, agentPhone: string, am
     }
 }
 
+const cashIn = async (decodedToken: Record<string, any>, receiverPhone: string, amount: number, password: string) => {
+    const session = await Wallet.startSession();
+    session.startTransaction();
+
+    try {
+        const agent = await User.findById(decodedToken.userId).session(session)
+        if (!agent) {
+            throw new AppError(statusCode.NOT_FOUND, 'User not found')
+        }
+        const passwordMatch = await bcryptjs.compare(password, agent.password);
+        if (!passwordMatch) {
+            throw new AppError(statusCode.UNAUTHORIZED, 'Incorrect password')
+        }
+
+        const agentWallet = await Wallet.findOne({ user: decodedToken.userId }).session(session);
+        if (!agentWallet || agentWallet.status === WalletStatus.BLOCKED) {
+            throw new AppError(statusCode.FORBIDDEN, 'Your wallet is blocked or not found')
+        }
+
+        const user = await User.findOne({ phone: receiverPhone }).session(session);
+        if (!user) {
+            throw new AppError(statusCode.NOT_FOUND, "Receiver phone not found");
+        }
+        if (user.role !== Role.USER) {
+            throw new AppError(statusCode.UNAUTHORIZED, "Only cash in to user not agent");
+        }
+
+        const userWallet = await Wallet.findOne({ user: user._id }).session(session);
+        if (!userWallet || userWallet.status === WalletStatus.BLOCKED) {
+            throw new AppError(statusCode.FORBIDDEN, 'Receiver wallet is blocked')
+        }
+
+        const numericAmount = Number(amount);
+        if (numericAmount < 50) {
+            throw new AppError(statusCode.BAD_REQUEST, 'Minimum top-up/cash in amount is 50')
+        }
+
+        if (agentWallet.balance < numericAmount) {
+            throw new AppError(statusCode.BAD_REQUEST, 'Insufficient balance')
+        }
+
+        const fee = 0;
+        agentWallet.balance -= numericAmount;
+        userWallet.balance += numericAmount;
+
+        await agentWallet.save({ session });
+        await userWallet.save({ session });
+
+        await Transaction.create([{
+            from: agentWallet._id,
+            to: userWallet._id,
+            amount: numericAmount,
+            fee,
+            type: TransactionType.CASH_IN,
+        }], { session })
+
+        await session.commitTransaction()
+
+        return {
+            message: `Amount ${amount} successfully added to ${user.phone} via Cash In.`,
+        };
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+}
+
 export const WalletService = {
     sendMoney,
     cashOut,
+    cashIn,
 }
