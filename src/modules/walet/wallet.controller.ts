@@ -7,9 +7,23 @@ import { WalletService } from "./wallet.service";
 
 const sendMoney = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user;
-    const { receiverPhone, amount } = req.body;
+    const { receiverPhone, amount, password } = req.body;
     
-    const result = await WalletService.sendMoney(decodedToken, receiverPhone, amount)
+    const result = await WalletService.sendMoney(decodedToken, receiverPhone, amount, password)
+
+    sendResponse(res, {
+        success: true,
+        statusCode: statusCode.OK,
+        message: 'Send successfully',
+        data: result.message,
+    })
+});
+
+const cashOut = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user;
+    const { agentPhone, amount, password } = req.body;
+    
+    const result = await WalletService.cashOut(decodedToken, agentPhone, amount, password);
 
     sendResponse(res, {
         success: true,
@@ -21,4 +35,5 @@ const sendMoney = catchAsync(async (req: Request, res: Response, next: NextFunct
 
 export const WalletController = {
     sendMoney,
+    cashOut,
 }
