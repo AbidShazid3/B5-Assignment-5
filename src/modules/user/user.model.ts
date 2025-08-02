@@ -25,9 +25,7 @@ const userSchema = new Schema<IUser>({
     role: {
         type: String,
         enum: Object.values(Role),
-        default: Role.USER
     },
-    isApproved: { type: Boolean, default: false },
     status: {
         type: String,
         enum: Object.values(UserStatus),

@@ -1,5 +1,5 @@
 import { model, Schema } from "mongoose";
-import { ITransaction, TransactionType } from "./transaction.interface";
+import { Direction, ITransaction, TransactionStatus, TransactionType } from "./transaction.interface";
 
 
 const transactionSchema = new Schema<ITransaction>({
@@ -20,6 +20,16 @@ const transactionSchema = new Schema<ITransaction>({
         enum: Object.values(TransactionType),
         required: true
     },
-}, {timestamps: true, versionKey: false});
+    status: {
+        type: String,
+        enum: Object.values(TransactionStatus),
+        default: TransactionStatus.COMPLETED
+    },
+    direction: {
+        type: String,
+        enum: Object.values(Direction),
+        required: false,
+    }
+}, { timestamps: true, versionKey: false });
 
 export const Transaction = model<ITransaction>("Transaction", transactionSchema);

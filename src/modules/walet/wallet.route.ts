@@ -23,5 +23,9 @@ router.post('/cash-in',
     validateRequest(cashInZodSchema),
     WalletController.cashIn);
 
+router.get('/my-wallet', checkAuth(Role.USER, Role.AGENT), WalletController.getMyWallet);
+
+router.get('/my-transaction', checkAuth(Role.USER, Role.AGENT), WalletController.getMyTransactions)
+
 
 export const WalletRoutes = router;

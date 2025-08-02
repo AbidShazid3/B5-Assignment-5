@@ -8,7 +8,7 @@ export enum Role {
 
 export enum UserStatus {
     ACTIVE = 'ACTIVE',
-    INACTIVE = 'INACTIVE',
+    PENDING = 'PENDING',
     BLOCKED = 'BLOCKED',
 }
 
@@ -29,7 +29,6 @@ export interface IUser {
     phone: string,
     password: string,
     role: Role,
-    isApproved?: boolean,
     status?: UserStatus,
     wallet: Types.ObjectId,
     picture?: string,

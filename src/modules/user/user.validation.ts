@@ -1,4 +1,5 @@
 import z from "zod";
+import { Role } from "./user.interface";
 
 export const registerUserZodSchema = z.object({
     name: z
@@ -23,4 +24,6 @@ export const registerUserZodSchema = z.object({
         .regex(/^(?=.*\d)/, {
             message: "Password must contain at least 1 number.",
         }),
+    role: z
+    .enum(Object.values(Role))
 });

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import AppError from "../../errorHelpers/AppError";
-import { TransactionType } from "../transaction/transaction.interface";
+import { Direction, TransactionType } from "../transaction/transaction.interface";
 import { Transaction } from "../transaction/transaction.model";
 import { Role } from "../user/user.interface";
 import { User } from "../user/user.model";
@@ -41,6 +41,10 @@ const sendMoney = async (decodedToken: Record<string, any>, receiverPhone: strin
             throw new AppError(statusCode.FORBIDDEN, 'Receiver wallet is blocked or not found')
         }
 
+        if (receiverUser._id.toString() === senderUser._id.toString()) {
+            throw new AppError(statusCode.BAD_REQUEST, "You cannot send money to yourself");
+        }
+
         const numericAmount = Number(amount);
         if (numericAmount < 20) {
             throw new AppError(statusCode.BAD_REQUEST, 'Minimum send amount is 20')
@@ -63,12 +67,20 @@ const sendMoney = async (decodedToken: Record<string, any>, receiverPhone: strin
             amount: numericAmount,
             fee,
             type: TransactionType.SEND,
-        }], { session })
+            direction: Direction.SENT
+        }, {
+            from: senderWallet._id,
+            to: receiverWallet._id,
+            amount: numericAmount,
+            fee: 0,
+            type: TransactionType.SEND,
+            direction: Direction.RECEIVED
+        }], { session, ordered: true })
 
         await session.commitTransaction()
 
         return {
-            message: `Successfully send ${numericAmount} to ${receiverUser.phone}`
+            message: `Successfully send ${numericAmount} to ${receiverUser.phone}.Fee ${fee}`,
         }
     } catch (error) {
         await session.abortTransaction();
@@ -212,10 +224,34 @@ const cashIn = async (decodedToken: Record<string, any>, receiverPhone: string, 
     } finally {
         session.endSession();
     }
+};
+
+const getMyWallet = async (userId: string) => {
+    const wallet = await Wallet.findOne({ user: userId });
+    if (!wallet) {
+        throw new AppError(statusCode.NOT_FOUND, 'Wallet not found')
+    }
+    if (wallet.status === WalletStatus.BLOCKED) {
+        throw new AppError(statusCode.BAD_REQUEST, 'Your wallet is blocked. Contact to support')
+    }
+    return wallet;
+};
+
+const getMyTransactions = async (userId: string) => {
+    const wallet = await Wallet.findOne({ user: userId });
+    if (!wallet) {
+        throw new AppError(statusCode.NOT_FOUND, 'Wallet not found')
+    }
+    if (wallet.status === WalletStatus.BLOCKED) {
+        throw new AppError(statusCode.BAD_REQUEST, 'Your wallet is blocked. Contact to support')
+    }
+
 }
 
 export const WalletService = {
     sendMoney,
     cashOut,
     cashIn,
+    getMyWallet,
+    getMyTransactions,
 }
