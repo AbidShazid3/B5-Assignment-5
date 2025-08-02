@@ -2,7 +2,7 @@
 import AppError from "../../errorHelpers/AppError";
 import { Direction, TransactionType } from "../transaction/transaction.interface";
 import { Transaction } from "../transaction/transaction.model";
-import { Role } from "../user/user.interface";
+import { Role, UserStatus } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { WalletStatus } from "./wallet.interface";
 import { Wallet } from "./wallet.model";
@@ -128,7 +128,7 @@ const withdraw = async (decodedToken: Record<string, any>, amount: number, passw
             fee: 0,
             type: TransactionType.WITHDRAW,
             direction: Direction.SENT
-        }], { session});
+        }], { session });
 
         await session.commitTransaction();
         return { message: `Withdrawn amount is ${numericAmount} successfully completed.` };
@@ -163,6 +163,9 @@ const cashOut = async (decodedToken: Record<string, any>, agentPhone: string, am
         if (!agentUser) {
             throw new AppError(statusCode.NOT_FOUND, "Agent not found");
         }
+        if (agentUser.status === UserStatus.PENDING) {
+            throw new AppError(statusCode.BAD_REQUEST, "Can not cash out though this agent");
+        }
 
         const agentWallet = await Wallet.findOne({ user: agentUser._id }).session(session);
         if (!agentWallet || agentWallet.status === WalletStatus.BLOCKED) {
@@ -171,7 +174,7 @@ const cashOut = async (decodedToken: Record<string, any>, agentPhone: string, am
 
         const numericAmount = Number(amount);
         if (numericAmount < 50) {
-            throw new AppError(statusCode.BAD_REQUEST, 'Minimum Withdraw/cash out amount is 50')
+            throw new AppError(statusCode.BAD_REQUEST, 'Minimum cash out amount is 50')
         }
 
         const fee = 5;
@@ -192,7 +195,15 @@ const cashOut = async (decodedToken: Record<string, any>, agentPhone: string, am
             amount: numericAmount,
             fee,
             type: TransactionType.CASH_OUT,
-        }], { session })
+            direction: Direction.SENT
+        }, {
+            from: userWallet._id,
+            to: agentWallet._id,
+            amount: numericAmount,
+            fee,
+            type: TransactionType.CASH_OUT,
+            direction: Direction.RECEIVED
+        }], { session, ordered: true })
 
         await session.commitTransaction()
 
@@ -241,6 +252,9 @@ const cashIn = async (decodedToken: Record<string, any>, receiverPhone: string, 
         if (!agent) {
             throw new AppError(statusCode.NOT_FOUND, 'User not found')
         }
+        if (agent.status === UserStatus.PENDING) {
+            throw new AppError(statusCode.UNAUTHORIZED, 'Waiting for admin approved. Or send request to approved')
+        }
         const passwordMatch = await bcryptjs.compare(password, agent.password);
         if (!passwordMatch) {
             throw new AppError(statusCode.UNAUTHORIZED, 'Incorrect password')
@@ -266,7 +280,7 @@ const cashIn = async (decodedToken: Record<string, any>, receiverPhone: string, 
 
         const numericAmount = Number(amount);
         if (numericAmount < 50) {
-            throw new AppError(statusCode.BAD_REQUEST, 'Minimum top-up/cash in amount is 50')
+            throw new AppError(statusCode.BAD_REQUEST, 'Minimum cash in amount is 50')
         }
 
         if (agentWallet.balance < numericAmount) {
@@ -286,7 +300,15 @@ const cashIn = async (decodedToken: Record<string, any>, receiverPhone: string, 
             amount: numericAmount,
             fee,
             type: TransactionType.CASH_IN,
-        }], { session })
+            direction: Direction.SENT
+        }, {
+            from: agentWallet._id,
+            to: userWallet._id,
+            amount: numericAmount,
+            fee,
+            type: TransactionType.CASH_IN,
+            direction: Direction.RECEIVED
+        }], { session, ordered: true })
 
         await session.commitTransaction()
 
