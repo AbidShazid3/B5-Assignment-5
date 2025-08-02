@@ -8,7 +8,7 @@ import { WalletService } from "./wallet.service";
 const sendMoney = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user;
     const { receiverPhone, amount, password } = req.body;
-    
+
     const result = await WalletService.sendMoney(decodedToken, receiverPhone, amount, password)
 
     sendResponse(res, {
@@ -19,10 +19,24 @@ const sendMoney = catchAsync(async (req: Request, res: Response, next: NextFunct
     })
 });
 
+const withdraw = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user;
+    const { amount, password } = req.body;
+
+    const result = await WalletService.withdraw(decodedToken, amount, password);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: 200,
+        message: "Done successfully",
+        data: result.message,
+    });
+})
+
 const cashOut = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user;
     const { agentPhone, amount, password } = req.body;
-    
+
     const result = await WalletService.cashOut(decodedToken, agentPhone, amount, password);
 
     sendResponse(res, {
@@ -33,10 +47,24 @@ const cashOut = catchAsync(async (req: Request, res: Response, next: NextFunctio
     })
 });
 
+const addMoney = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user;
+    const { amount } = req.body;
+
+    const result = await WalletService.addMoney(decodedToken, amount,);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: statusCode.OK,
+        message: 'Add money successfully done',
+        data: result
+    })
+})
+
 const cashIn = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user;
     const { receiverPhone, amount, password } = req.body;
-    
+
     const result = await WalletService.cashIn(decodedToken, receiverPhone, amount, password);
 
     sendResponse(res, {
@@ -73,7 +101,9 @@ const getMyTransactions = catchAsync(async (req: Request, res: Response, next: N
 
 export const WalletController = {
     sendMoney,
+    withdraw,
     cashOut,
+    addMoney,
     cashIn,
     getMyWallet,
     getMyTransactions,

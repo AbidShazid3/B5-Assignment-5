@@ -90,6 +90,56 @@ const sendMoney = async (decodedToken: Record<string, any>, receiverPhone: strin
     }
 }
 
+const withdraw = async (decodedToken: Record<string, any>, amount: number, password: string) => {
+    const session = await Wallet.startSession();
+    session.startTransaction();
+    try {
+        const user = await User.findById(decodedToken.userId).session(session);
+        if (!user) {
+            throw new AppError(statusCode.NOT_FOUND, "User not found");
+        }
+
+        const passwordMatch = await bcryptjs.compare(password, user.password);
+        if (!passwordMatch) {
+            throw new AppError(statusCode.UNAUTHORIZED, "Incorrect password");
+        }
+
+        const wallet = await Wallet.findOne({ user: user._id }).session(session);
+        if (!wallet || wallet.status === WalletStatus.BLOCKED) {
+            throw new AppError(statusCode.FORBIDDEN, "Wallet is blocked or not found");
+        }
+
+        const numericAmount = Number(amount);
+        if (numericAmount < 50) {
+            throw new AppError(statusCode.BAD_REQUEST, "Minimum withdraw amount is 50");
+        }
+
+        if (wallet.balance < numericAmount) {
+            throw new AppError(statusCode.BAD_REQUEST, "Insufficient balance");
+        }
+
+        wallet.balance -= numericAmount;
+        await wallet.save({ session });
+
+        await Transaction.create([{
+            from: wallet._id,
+            to: null,
+            amount: numericAmount,
+            fee: 0,
+            type: TransactionType.WITHDRAW,
+            direction: Direction.SENT
+        }], { session});
+
+        await session.commitTransaction();
+        return { message: `Withdrawn amount is ${numericAmount} successfully completed.` };
+    } catch (error) {
+        await session.abortTransaction();
+        throw error;
+    } finally {
+        session.endSession();
+    }
+}
+
 const cashOut = async (decodedToken: Record<string, any>, agentPhone: string, amount: number, password: string) => {
     const session = await Wallet.startSession();
     session.startTransaction();
@@ -155,6 +205,31 @@ const cashOut = async (decodedToken: Record<string, any>, agentPhone: string, am
     } finally {
         session.endSession();
     }
+}
+
+const addMoney = async (decodedToken: Record<string, any>, amount: number) => {
+    const wallet = await Wallet.findOne({ user: decodedToken.userId });
+
+    if (!wallet) {
+        throw new AppError(statusCode.NOT_FOUND, "Wallet not found");
+    }
+    if (wallet.status === WalletStatus.BLOCKED) {
+        throw new AppError(statusCode.BAD_REQUEST, "Your wallet is blocked");
+    }
+
+    wallet.balance += amount;
+    await wallet.save();
+
+    await Transaction.create({
+        from: null,
+        to: wallet._id,
+        amount,
+        fee: 0,
+        type: TransactionType.TOP_UP,
+        direction: Direction.RECEIVED
+    });
+
+    return wallet;
 }
 
 const cashIn = async (decodedToken: Record<string, any>, receiverPhone: string, amount: number, password: string) => {
@@ -246,11 +321,34 @@ const getMyTransactions = async (userId: string) => {
         throw new AppError(statusCode.BAD_REQUEST, 'Your wallet is blocked. Contact to support')
     }
 
+    const transactions = await Transaction.find({
+        $or: [{ from: wallet._id }, { to: wallet._id }]
+    })
+        .populate({
+            path: 'from',
+            populate: {
+                path: 'user',
+                select: 'name phone'
+            }
+        })
+        .populate({
+            path: 'to',
+            populate: {
+                path: 'user',
+                select: 'name phone'
+            }
+        })
+        .sort({ createdAt: -1 });
+
+    return transactions;
+
 }
 
 export const WalletService = {
     sendMoney,
+    withdraw,
     cashOut,
+    addMoney,
     cashIn,
     getMyWallet,
     getMyTransactions,

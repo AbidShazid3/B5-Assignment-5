@@ -24,6 +24,25 @@ export const sendMoneyZodSchema = z.object({
     }),
 });
 
+export const withdrawZodSchema = z.object({
+  amount: z
+    .number({ error: "Amount is required" })
+    .min(50, "Amount must be at least 50"),
+  password: z
+    .string({ error: "Password is required" })
+    .min(5, "Password must be at least 5 digits")
+    .max(20, "Password must be exactly 20 digits")
+    .regex(/^(?=.*[A-Z])/, {
+      message: "Password must contain at least 1 uppercase letter.",
+    })
+    .regex(/^(?=.*[!@#$%^&*])/, {
+      message: "Password must contain at least 1 special character.",
+    })
+    .regex(/^(?=.*\d)/, {
+      message: "Password must contain at least 1 number.",
+    }),
+});
+
 export const cashOutZodSchema = z.object({
   agentPhone: z
     .string({ error: "Phone number is required" })
@@ -46,6 +65,12 @@ export const cashOutZodSchema = z.object({
     .regex(/^(?=.*\d)/, {
       message: "Password must contain at least 1 number.",
     }),
+});
+
+export const addMoneyZodSchema = z.object({
+  amount: z
+    .number({ error: "Amount is required" })
+    .min(20, "Amount must be at least 20"),
 });
 
 export const cashInZodSchema = z.object({

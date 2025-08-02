@@ -2,7 +2,7 @@ import { Router } from "express";
 import { checkAuth } from "../../middlewares/checkAuth";
 import { Role } from "../user/user.interface";
 import { validateRequest } from "../../middlewares/validationRequest";
-import { cashInZodSchema, cashOutZodSchema, sendMoneyZodSchema } from "./wallet.validation";
+import { addMoneyZodSchema, cashInZodSchema, cashOutZodSchema, sendMoneyZodSchema, withdrawZodSchema } from "./wallet.validation";
 import { WalletController } from "./wallet.controller";
 
 
@@ -13,10 +13,20 @@ router.post('/send-money',
     validateRequest(sendMoneyZodSchema),
     WalletController.sendMoney);
 
+router.post('/withdraw',
+  checkAuth(Role.USER),
+  validateRequest(withdrawZodSchema),
+  WalletController.withdraw);
+
 router.post('/cash-out',
     checkAuth(Role.USER),
     validateRequest(cashOutZodSchema),
     WalletController.cashOut);
+
+router.post('/add-money',
+    checkAuth(Role.USER),
+    validateRequest(addMoneyZodSchema),
+    WalletController.addMoney);
 
 router.post('/cash-in',
     checkAuth(Role.AGENT),
