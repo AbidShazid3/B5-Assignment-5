@@ -5,7 +5,6 @@ import { registerUserZodSchema } from "./user.validation";
 
 const router = Router();
 
-router.post('/register',validateRequest(registerUserZodSchema), UserController.registerUser)
-
+router.post('/register', validateRequest(registerUserZodSchema), UserController.registerUser);
 
 export const UserRoutes = router;

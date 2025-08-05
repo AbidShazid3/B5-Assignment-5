@@ -6,7 +6,7 @@ import bcryptjs from 'bcryptjs';
 import { envVars } from "../../config/env";
 import { Wallet } from "../walet/wallet.model";
 
-const registerUser = async (payload: IUser) => {
+const registerUser = async (payload: Partial<IUser>) => {
     const { phone, password, role, ...rest } = payload;
     const session = await User.startSession();
     session.startTransaction();
@@ -19,7 +19,7 @@ const registerUser = async (payload: IUser) => {
         if (isUserExist) {
             throw new AppError(statusCode.BAD_REQUEST, 'Phone Number already exist')
         }
-        const hashPassword = await bcryptjs.hash(password, Number(envVars.BCRYPT_SALT_ROUND));
+        const hashPassword = await bcryptjs.hash(password as string, Number(envVars.BCRYPT_SALT_ROUND));
         const status = role === Role.AGENT ? UserStatus.PENDING : UserStatus.ACTIVE
         const user = await User.create([{
             phone,
@@ -33,7 +33,7 @@ const registerUser = async (payload: IUser) => {
         const wallet = await Wallet.create(
             [{ user: user[0]._id, balance: initialBalance }],
             { session });
-        
+
         user[0].wallet = wallet[0]._id
         await user[0].save();
         await session.commitTransaction()

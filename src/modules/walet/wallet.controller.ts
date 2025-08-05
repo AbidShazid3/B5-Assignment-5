@@ -87,18 +87,6 @@ const getMyWallet = catchAsync(async (req: Request, res: Response, next: NextFun
     })
 });
 
-const getMyTransactions = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = req.user;
-    const result = await WalletService.getMyTransactions(decodedToken.userId);
-
-    sendResponse(res, {
-        success: true,
-        statusCode: statusCode.OK,
-        message: 'My transaction retrieved successfully',
-        data: result,
-    })
-})
-
 export const WalletController = {
     sendMoney,
     withdraw,
@@ -106,5 +94,4 @@ export const WalletController = {
     addMoney,
     cashIn,
     getMyWallet,
-    getMyTransactions,
 }
