@@ -1,86 +1,142 @@
-# 💸 Digital Wallet API
+# 💰 Digital Wallet API
 
-A secure, role-based digital wallet system built with Node.js, Express, and MongoDB.
-
----
-
-## 📁 Features
-
-### 👤 User:
-- ✅ Register/Login (JWT + PIN-based auth)
-- ✅ Wallet auto-created
-- ✅ Send Money (min 50, 5tk fee if >100)
-- ✅ Withdraw Money (via Agent)
-- ✅ Cash-In (via Agent approval)
-- ✅ Balance Check
-- ✅ Transaction History (SENT / RECEIVED)
-
-### 🧑‍💼 Agent:
-- ✅ Register/Login (Pending until approved by Admin)
-- ✅ Cash-In to users
-- ✅ Cash-Out from users
-- ✅ Transaction History
-
-### 👨‍💼 Admin:
-- ✅ View all users/agents/wallets/transactions
-- ✅ Approve/Suspend Agents
-- ✅ Block/Unblock Wallets
+A secure, role-based RESTful API for a Digital Wallet system using **Express.js**, **MongoDB**, and **JWT Authentication**.  
+Supports three user roles: **User**, **Agent**, and **Admin**.
 
 ---
 
-## 🚀 Technologies
-- Node.js, Express.js
-- MongoDB, Mongoose
-- TypeScript
-- JWT Authentication
-- Bcrypt for PIN/password hashing
-- Role-based Access Control
-- Postman for testing
+## 📌 Features
+
+- ✅ Role-Based Access Control (User / Agent / Admin)
+- 🔐 Secure JWT Authentication
+- 💸 Wallet Operations (Send, Withdraw, Cash-in/out, Add Money)
+- 📄 Transaction History
+- 🛡️ Admin Features (User/Agent management, Wallet Blocking)
+- 📦 Input validation using Zod
+- 🧪 Tested via Postman (no frontend required)
 
 ---
 
-## 📦 API Endpoints
+## 👥 Roles & Permissions
+
+| Role   | Accessible Routes                                                                 |
+|--------|-----------------------------------------------------------------------------------|
+| Public | `POST /auth/login`, `POST /users/register`                                       |
+| User   | `/wallet/send-money`, `/wallet/withdraw`, `/wallet/cash-out`, `/wallet/add-money`, `/wallet/my-wallet`, `/transactions/my-transaction` |
+| Agent  | `/wallet/cash-in`, `/wallet/my-wallet`, `/transactions/my-transaction`           |
+| Admin  | `/admin/users`, `/admin/agents`, `/admin/wallets`, `/admin/transactions`, `/admin/wallets/block/:id`, `/admin/agents/status/:id` |
+
+---
+
+## 📦 REST API Endpoints
 
 ### 🔐 Auth
-- `POST /auth/register` - Register (User/Agent)
-- `POST /auth/login` - Login
 
-### 👤 User (Protected)
-- `POST /wallet/add-money`
-- `POST /wallet/withdraw`
-- `POST /wallet/send-money`
-- `GET /wallet/balance`
-- `GET /wallet/transactions`
-
-### 🧑‍💼 Agent (Protected)
-- `POST /agent/cash-in`
-- `POST /agent/cash-out`
-- `GET /agent/transactions`
-
-### 👨‍💼 Admin (Protected)
-- `GET /admin/users`
-- `GET /admin/agents`
-- `GET /admin/wallets`
-- `PATCH /admin/wallets/block/:id`
-- `PATCH /admin/agents/approve/:id`
-- `GET /admin/transactions`
+| Method | Endpoint         | Description     |
+|--------|------------------|-----------------|
+| POST   | `/auth/login`    | Login a user    |
+| POST   | `/auth/logout`   | Logout a user   |
 
 ---
 
-## 🔑 Authorization
+### 👤 User
 
-Each request to protected endpoints must include:
-
+| Method | Endpoint              | Role  | Description           |
+|--------|-----------------------|-------|-----------------------|
+| POST   | `/users/register`     | Public | Register as user/agent |
 
 ---
 
-## 🧪 Postman Testing
+### 💳 Wallet (USER & AGENT)
 
-1. ✅ Register user & agent → `/auth/register`
-2. ✅ Login → `/auth/login` → copy token
-3. 🔐 Use token to access protected routes.
-4. ✅ Create send, cash-in, cash-out transactions.
-5. ✅ Test admin routes after login as admin.
+| Method | Endpoint                | Role    | Description           |
+|--------|-------------------------|---------|-----------------------|
+| POST   | `/wallet/send-money`    | User    | Send money to user    |
+| POST   | `/wallet/withdraw`      | User    | Withdraw from wallet  |
+| POST   | `/wallet/add-money`     | User    | Add self-fund money   |
+| POST   | `/wallet/cash-out`      | User    | Cash-out to agent     |
+| POST   | `/wallet/cash-in`       | Agent   | Cash-in to user       |
+| GET    | `/wallet/my-wallet`     | User, Agent | Get own wallet      |
+
+---
+
+### 📜 Transactions
+
+| Method | Endpoint                    | Role         | Description            |
+|--------|-----------------------------|--------------|------------------------|
+| GET    | `/transactions/my-transaction` | User, Agent | Get own transactions   |
+
+---
+
+### 🛠️ Admin
+
+| Method | Endpoint                      | Description                     |
+|--------|-------------------------------|---------------------------------|
+| GET    | `/admin/users`                | View all users                  |
+| GET    | `/admin/agents`               | View all agents                 |
+| GET    | `/admin/wallets`              | View all wallets                |
+| GET    | `/admin/transactions`         | View all transactions           |
+| PATCH  | `/admin/wallets/block/:id`    | Block or unblock a wallet       |
+| PATCH  | `/admin/agents/status/:id`    | Approve or reject an agent      |
+
+---
+
+## 🧪 Testing with Postman
+
+1. 🔐 Login as a user/agent/admin:  
+   → Save the returned `accessToken`.
+
+2. 🔑 For protected routes, add this in Postman headers:
+
+---
+
+
+3. 📦 Test routes by role:
+- User: Try `/wallet/send-money`
+- Agent: Try `/wallet/cash-in`
+- Admin: Try `/admin/users`
+
+---
+
+## 🛠️ Technologies Used
+
+- Express.js
+- MongoDB with Mongoose
+- Zod (for request validation)
+- JSON Web Tokens (JWT)
+- TypeScript (Optional, if used)
+- bcryptjs (for PIN hashing)
+- dotenv (for config management)
+
+---
+
+## 🔒 Security Features
+
+- Password/PIN hashing with bcrypt
+- JWT-based authentication
+- Role-based authorization on all routes
+- Request schema validation with Zod
+
+---
+
+## 📥 Clone & Run Locally
+### Follow these steps to clone and run the project on your machine:
+
+#### 1. Clone the repository
+git clone https://github.com/AbidShazid3/B5-Assignment-5.git
+
+#### 2. Install dependencies
+npm install
+
+##### 3. Create a .env file in the root folder and add environment variables
+cp .env.example .env
+#### Then fill in your own values inside .env
+
+#### 4. Run the development server
+npm run dev
+
+#### The API will be running on: http://localhost:5000
+
 
 ---
 
