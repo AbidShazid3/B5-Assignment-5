@@ -4,13 +4,19 @@ import cookieParser from 'cookie-parser';
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import notFound from "./middlewares/notFound";
 import { router } from "./routes";
+import { envVars } from "./config/env";
 
 
 const app: Application = express();
 
 app.use(express.json());
-app.use(cors());
+app.set("trust proxy", 1);
+app.use(cors({
+    origin: envVars.FRONTEND_URL,
+    credentials: true
+}))
 app.use(cookieParser());
+
 
 app.use('/api', router)
 
