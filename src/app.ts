@@ -9,13 +9,13 @@ import { envVars } from "./config/env";
 
 const app: Application = express();
 
-app.use(express.json());
 app.set("trust proxy", 1);
+app.use(express.json());
+app.use(cookieParser());
 app.use(cors({
     origin: envVars.FRONTEND_URL,
     credentials: true
 }))
-app.use(cookieParser());
 
 
 app.use('/api', router)

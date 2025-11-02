@@ -12,7 +12,7 @@ export const registerUserZodSchema = z.object({
             message: "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
         }),
     email: z
-        .email("Email must be string.")
+        .union([z.literal(""), z.email({ message: "Invalid email address" })])
         .optional(),
     password: z
         .string({ error: "Password is required" })
