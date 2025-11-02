@@ -4,6 +4,7 @@ import { catchAsync } from "../../utils/catchAsync";
 import sendResponse from "../../utils/sendResponse";
 import statusCode from 'http-status-codes';
 import { UserService } from "./user.service";
+import { JwtPayload } from "jsonwebtoken";
 
 const registerUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const payload = req.body;
@@ -17,6 +18,45 @@ const registerUser = catchAsync(async (req: Request, res: Response, next: NextFu
     })
 })
 
+const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload
+    const user = await UserService.getMe(decodedToken.userId);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: statusCode.OK,
+        message: 'User data retrieved successfully',
+        data: user,
+    })
+})
+
+const getSingleUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const id = req.params.id;
+    const user = await UserService.getSingleUser(id);
+
+    sendResponse(res, {
+        success: true,
+        statusCode: statusCode.OK,
+        message: 'User retrieved successfully',
+        data: user,
+    })
+});
+
+const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
+    const decodedToken = req.user as JwtPayload
+    const user = await UserService.updateUser(req.body, decodedToken as JwtPayload)
+
+    sendResponse(res, {
+        success: true,
+        statusCode: statusCode.OK,
+        message: 'User updated successfully',
+        data: user,
+    })
+});
+
 export const UserController = {
     registerUser,
+    getMe,
+    getSingleUser,
+    updateUser,
 }

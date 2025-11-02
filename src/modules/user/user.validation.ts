@@ -11,6 +11,9 @@ export const registerUserZodSchema = z.object({
         .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
             message: "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
         }),
+    email: z
+        .email("Email must be string.")
+        .optional(),
     password: z
         .string({ error: "Password is required" })
         .min(5, "Password must be at least 5 digits")
@@ -25,5 +28,26 @@ export const registerUserZodSchema = z.object({
             message: "Password must contain at least 1 number.",
         }),
     role: z
-    .enum(Object.values(Role))
+        .enum(Object.values(Role))
 });
+
+export const updateUserZodSchema = z.object({
+    name: z
+        .string({ error: "Name must be string" })
+        .min(2, { message: "Name must be at least 2 characters long." })
+        .max(50, { message: "Name cannot exceed 50 characters." })
+        .optional(),
+    phone: z
+        .string({ error: "Phone number is required" })
+        .regex(/^(?:\+8801\d{9}|01\d{9})$/, {
+            message: "Phone number must be valid for Bangladesh. Format: +8801XXXXXXXXX or 01XXXXXXXXX",
+        })
+        .optional(),
+    email: z
+        .email("Email must be string.")
+        .optional(),
+    address: z
+        .string({ error: "address must be string." })
+        .min(3, { error: "address must be string." })
+        .optional(),
+})

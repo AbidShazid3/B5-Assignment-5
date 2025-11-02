@@ -5,6 +5,7 @@ import statusCode from 'http-status-codes';
 import bcryptjs from 'bcryptjs';
 import { envVars } from "../../config/env";
 import { Wallet } from "../walet/wallet.model";
+import { JwtPayload } from "jsonwebtoken";
 
 const registerUser = async (payload: Partial<IUser>) => {
     const { phone, password, role, ...rest } = payload;
@@ -47,8 +48,51 @@ const registerUser = async (payload: Partial<IUser>) => {
     } finally {
         session.endSession();
     }
+};
+
+const getMe = async (id: string) => {
+    const result = await User.findById(id)
+        .populate({
+            path: "wallet",
+            select: "-__v -createdAt -updatedAt"
+        })
+        .select("-password");
+
+    if (!result) {
+        throw new AppError(statusCode.BAD_REQUEST, "User not found.");
+    }
+    return result;
 }
+
+const getSingleUser = async (id: string) => {
+
+    const user = await User.findById(id).populate({
+        path: "wallet",
+        select: "-__v -createdAt -updatedAt"
+    }).select("-password");
+
+    if (!user) {
+        throw new AppError(statusCode.BAD_REQUEST, "User not found.");
+    }
+
+    return user;
+};
+
+const updateUser = async (payload: Partial<IUser>, decodedToken: JwtPayload) => {
+    const user = await User.findById(decodedToken.userId);
+    if (!user) {
+        throw new AppError(statusCode.NOT_FOUND, "User not found.");
+    }
+
+    const updatedResult = await User.findByIdAndUpdate(decodedToken.userId, payload, { new: true, runValidators: true }).select("-password");
+
+    return updatedResult;
+}
+
 
 export const UserService = {
     registerUser,
+    getMe,
+    getSingleUser,
+    updateUser,
 }

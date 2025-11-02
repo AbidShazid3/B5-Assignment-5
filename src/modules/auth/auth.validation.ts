@@ -21,3 +21,20 @@ export const loginZodSchema = z.object({
             message: "Password must contain at least 1 number.",
         }),
 });
+
+export const resetPasswordZodValidation = z.object({
+    oldPassword: z.string({ error: "old password required." }),
+    newPassword: z
+        .string({ error: "Password is required" })
+        .min(5, "Password must be at least 5 digits")
+        .max(20, "Password must be exactly 20 digits")
+        .regex(/^(?=.*[A-Z])/, {
+            message: "Password must contain at least 1 uppercase letter.",
+        })
+        .regex(/^(?=.*[!@#$%^&*])/, {
+            message: "Password must contain at least 1 special character.",
+        })
+        .regex(/^(?=.*\d)/, {
+            message: "Password must contain at least 1 number.",
+        }),
+});
