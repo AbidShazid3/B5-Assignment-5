@@ -19,7 +19,7 @@ const registerUser = catchAsync(async (req: Request, res: Response, next: NextFu
 })
 
 const getMe = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = req.user as JwtPayload
+    const decodedToken = req.user as JwtPayload;
     const user = await UserService.getMe(decodedToken.userId);
 
     sendResponse(res, {
@@ -43,14 +43,14 @@ const getSingleUser = catchAsync(async (req: Request, res: Response, next: NextF
 });
 
 const updateUser = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const decodedToken = req.user as JwtPayload
-    const user = await UserService.updateUser(req.body, decodedToken as JwtPayload)
+    const decodedToken = req.user as JwtPayload;
+    const result = await UserService.updateUser(req.body, decodedToken)
 
     sendResponse(res, {
         success: true,
         statusCode: statusCode.OK,
         message: 'User updated successfully',
-        data: user,
+        data: result,
     })
 });
 

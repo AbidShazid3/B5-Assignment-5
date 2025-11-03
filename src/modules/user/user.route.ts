@@ -8,7 +8,7 @@ import { Role } from "./user.interface";
 const router = Router();
 
 router.post('/register', validateRequest(registerUserZodSchema), UserController.registerUser);
-router.put('/update', validateRequest(updateUserZodSchema), UserController.registerUser);
+router.put('/update',checkAuth(...Object.values(Role)), validateRequest(updateUserZodSchema), UserController.updateUser);
 router.get('/me', checkAuth(...Object.values(Role)), UserController.getMe);
 router.get('/:id', checkAuth(...Object.values(Role)), UserController.getSingleUser);
 

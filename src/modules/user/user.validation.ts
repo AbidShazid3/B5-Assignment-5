@@ -44,7 +44,7 @@ export const updateUserZodSchema = z.object({
         })
         .optional(),
     email: z
-        .email("Email must be string.")
+        .union([z.literal(""), z.email({ message: "Invalid email address" })])
         .optional(),
     address: z
         .string({ error: "address must be string." })
