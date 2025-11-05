@@ -1,6 +1,6 @@
 import AppError from "../../errorHelpers/AppError";
 import { Transaction } from "../transaction/transaction.model";
-import { Role } from "../user/user.interface";
+import { Role, UserStatus } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { Wallet } from "../walet/wallet.model";
 import statusCode from 'http-status-codes';
@@ -41,17 +41,17 @@ const blockWallet = async (id: string, status: string) => {
     return walletStatusUpdate
 };
 
-const approveAgent = async (id: string, status: string) => {
-    const agent = await User.findById(id);
-    if (!agent) {
-        throw new AppError(statusCode.NOT_FOUND, 'Agent not found');
+const approveAgent = async (id: string, status: UserStatus) => {
+    const user = await User.findById(id);
+    if (!user) {
+        throw new AppError(statusCode.NOT_FOUND, 'User not found');
     }
-    if (agent.status === status) {
-        throw new AppError(statusCode.BAD_REQUEST, `Already in ${agent.status}`);
+    if (user.status === status) {
+        throw new AppError(statusCode.BAD_REQUEST, `Already in ${user.status}`);
     }
-    const agentStatusUpdate = await User.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
+    const userStatusUpdate = await User.findByIdAndUpdate(id, { status }, { new: true, runValidators: true });
 
-    return agentStatusUpdate;
+    return userStatusUpdate;
 };
 
 
