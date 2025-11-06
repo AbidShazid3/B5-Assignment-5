@@ -7,13 +7,15 @@ import statusCode from "http-status-codes";
 
 const getMyTransactions = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user;
-    const result = await TransactionService.getMyTransactions(decodedToken.userId);
+    const query = req.query;
+    const result = await TransactionService.getMyTransactions(decodedToken.userId, query as Record<string, string>);
 
     sendResponse(res, {
         success: true,
         statusCode: statusCode.OK,
         message: 'My transaction retrieved successfully',
-        data: result,
+        data: result.data,
+        meta: result.meta,
     })
 });
 
