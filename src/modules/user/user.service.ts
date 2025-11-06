@@ -66,10 +66,12 @@ const getMe = async (id: string) => {
 
 const getSingleUser = async (id: string) => {
 
-    const user = await User.findById(id).populate({
-        path: "wallet",
-        select: "-__v -createdAt -updatedAt"
-    }).select("-password");
+    const user = await User.findById(id)
+        .populate({
+            path: "wallet",
+            select: "-__v -createdAt -updatedAt"
+        })
+        .select("-password");
 
     if (!user) {
         throw new AppError(statusCode.BAD_REQUEST, "User not found.");

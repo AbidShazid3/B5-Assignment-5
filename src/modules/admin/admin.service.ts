@@ -79,7 +79,7 @@ const getAllTransactions = async (query: Record<string, string>) => {
             select: '-balance -createdAt -updatedAt -status',
             populate: {
                 path: 'user',
-                select: 'name phone'
+                select: 'name phone role'
             }
         })
         .populate({
@@ -87,7 +87,7 @@ const getAllTransactions = async (query: Record<string, string>) => {
             select: '-balance -createdAt -updatedAt -status',
             populate: {
                 path: 'user',
-                select: 'name phone'
+                select: 'name phone role'
             }
         })
 
