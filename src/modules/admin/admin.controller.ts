@@ -6,47 +6,55 @@ import sendResponse from "../../utils/sendResponse";
 import statusCode from 'http-status-codes';
 
 const getAllUsers = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const users = await AdminService.getAllUsers();
+    const query = req.query;
+    const result = await AdminService.getAllUsers(query as Record<string, string>);
 
     sendResponse(res, {
         success: true,
         statusCode: statusCode.OK,
         message: 'All User retrieved successfully',
-        data: users,
+        data: result.data,
+        meta: result.meta,
     })
 });
 
 const getAllAgents = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const users = await AdminService.getAllAgents();
+    const query = req.query;
+    const result = await AdminService.getAllAgents(query as Record<string, string>);
 
     sendResponse(res, {
         success: true,
         statusCode: statusCode.OK,
         message: 'All Agent retrieved successfully',
-        data: users,
+        data: result.data,
+        meta: result.meta,
     })
 });
 
 
 const getAllWallets = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const result = await AdminService.getAllWallets();
+    const query = req.query;
+    const result = await AdminService.getAllWallets(query as Record<string, string>);
 
     sendResponse(res, {
         success: true,
         statusCode: statusCode.OK,
         message: 'All Wallet retrieved successfully',
-        data: result,
+        data: result.data,
+        meta: result.meta,
     })
 });
 
 const getAllTransactions = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
-    const users = await AdminService.getAllTransactions();
+    const query = req.query;
+    const result = await AdminService.getAllTransactions(query as Record<string, string>);
 
     sendResponse(res, {
         success: true,
         statusCode: statusCode.OK,
         message: 'All Transactions retrieved successfully',
-        data: users,
+        data: result.data,
+        meta: result.meta,
     })
 });
 

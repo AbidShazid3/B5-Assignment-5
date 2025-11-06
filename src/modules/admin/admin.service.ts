@@ -1,31 +1,101 @@
 import AppError from "../../errorHelpers/AppError";
+import { QueryBuilder } from "../../utils/QueryBuilder";
 import { Transaction } from "../transaction/transaction.model";
+import { userSearchableFields } from "../user/user.constant";
 import { Role, UserStatus } from "../user/user.interface";
 import { User } from "../user/user.model";
 import { Wallet } from "../walet/wallet.model";
 import statusCode from 'http-status-codes';
 
-const getAllUsers = async () => {
-    const users = await User.find({ role: Role.USER });
+const getAllUsers = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(User.find({ role: Role.USER }), query);
+    const allUsers = queryBuilder
+        .filter()
+        .search(userSearchableFields)
+        .sort()
+        .fields()
+        .pagination();
+    const users = await allUsers.build().populate({
+        path: "wallet",
+        select: "-__v -createdAt -updatedAt"
+    })
+        .select("-password");
+    const totalUsers = await queryBuilder.getMeta();
 
-    return users;
+    return {
+        data: users,
+        meta: totalUsers,
+    }
 };
 
-const getAllAgents = async () => {
-    const agents = await User.find({ role: Role.AGENT })
+const getAllAgents = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(User.find({ role: Role.AGENT }), query);
+    const allAgent = queryBuilder
+        .filter()
+        .search(userSearchableFields)
+        .sort()
+        .fields()
+        .pagination();
+    const agents = await allAgent.build().populate({
+        path: "wallet",
+        select: "-__v -createdAt -updatedAt"
+    })
+        .select("-password");
+    const totalAgents = await queryBuilder.getMeta();
 
-    return agents;
+    return {
+        data: agents,
+        meta: totalAgents,
+    }
 };
 
-const getAllWallets = async () => {
-    const wallets = await Wallet.find().populate('user', 'name phone role');
+const getAllWallets = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(Wallet.find(), query);
+    const allWallet = queryBuilder
+        .filter()
+        .sort()
+        .pagination();
+    const wallets = await allWallet.build().populate('user', 'name phone role');
+    const totalWallets = await queryBuilder.getMeta();
 
-    return wallets
+    return {
+        data: wallets,
+        meta: totalWallets,
+    }
 };
 
-const getAllTransactions = async () => {
-    const transactions = await Transaction.find()
-    return transactions;
+const getAllTransactions = async (query: Record<string, string>) => {
+    const queryBuilder = new QueryBuilder(Transaction.find(), query);
+    const allTransaction = queryBuilder
+        .filter()
+        .sort()
+        .fields()
+        .pagination();
+
+
+    const transaction = await allTransaction.build()
+        .populate({
+            path: 'from',
+            select: '-balance -createdAt -updatedAt -status',
+            populate: {
+                path: 'user',
+                select: 'name phone'
+            }
+        })
+        .populate({
+            path: 'to',
+            select: '-balance -createdAt -updatedAt -status',
+            populate: {
+                path: 'user',
+                select: 'name phone'
+            }
+        })
+
+    const totalTransaction = await queryBuilder.getMeta();
+    return {
+        data: transaction,
+        meta: totalTransaction
+    };
 };
 
 const blockWallet = async (id: string, status: string) => {
