@@ -49,9 +49,9 @@ const cashOut = catchAsync(async (req: Request, res: Response, next: NextFunctio
 
 const addMoney = catchAsync(async (req: Request, res: Response, next: NextFunction) => {
     const decodedToken = req.user;
-    const { amount } = req.body;
+    const { amount, password } = req.body;
 
-    const result = await WalletService.addMoney(decodedToken, amount,);
+    const result = await WalletService.addMoney(decodedToken, amount, password);
 
     sendResponse(res, {
         success: true,

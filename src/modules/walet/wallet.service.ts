@@ -218,9 +218,17 @@ const cashOut = async (decodedToken: Record<string, any>, agentPhone: string, am
     }
 }
 
-const addMoney = async (decodedToken: Record<string, any>, amount: number) => {
-    const wallet = await Wallet.findOne({ user: decodedToken.userId });
+const addMoney = async (decodedToken: Record<string, any>, amount: number, password: string) => {
+    const user = await User.findById(decodedToken.userId)
+    if (!user) {
+        throw new AppError(statusCode.NOT_FOUND, 'User not found')
+    }
+    const passwordMatch = await bcryptjs.compare(password, user.password);
+    if (!passwordMatch) {
+        throw new AppError(statusCode.UNAUTHORIZED, 'Incorrect password')
+    }
 
+    const wallet = await Wallet.findOne({ user: decodedToken.userId });
     if (!wallet) {
         throw new AppError(statusCode.NOT_FOUND, "Wallet not found");
     }

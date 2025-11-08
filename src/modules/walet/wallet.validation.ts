@@ -1,5 +1,6 @@
 import z from "zod";
 
+// send money to another user (user)
 export const sendMoneyZodSchema = z.object({
   receiverPhone: z
     .string({ error: "Phone number is required" })
@@ -8,6 +9,7 @@ export const sendMoneyZodSchema = z.object({
     }),
   amount: z
     .number({ error: "Amount is required" })
+    .positive("Amount must be a positive number")
     .min(20, "Amount must be at least 20"),
   password: z
     .string({ error: "Password is required" })
@@ -24,9 +26,11 @@ export const sendMoneyZodSchema = z.object({
     }),
 });
 
+// withdraw money (user)
 export const withdrawZodSchema = z.object({
   amount: z
     .number({ error: "Amount is required" })
+    .positive("Amount must be a positive number")
     .min(50, "Amount must be at least 50"),
   password: z
     .string({ error: "Password is required" })
@@ -51,6 +55,7 @@ export const cashOutZodSchema = z.object({
     }),
   amount: z
     .number({ error: "Amount is required" })
+    .positive("Amount must be a positive number")
     .min(50, "Amount must be at least 50"),
   password: z
     .string({ error: "Password is required" })
@@ -67,10 +72,25 @@ export const cashOutZodSchema = z.object({
     }),
 });
 
+// add money (user)
 export const addMoneyZodSchema = z.object({
   amount: z
     .number({ error: "Amount is required" })
+    .positive("Amount must be a positive number")
     .min(20, "Amount must be at least 20"),
+  password: z
+    .string({ error: "Password is required" })
+    .min(5, "Password must be at least 5 digits")
+    .max(20, "Password must be exactly 20 digits")
+    .regex(/^(?=.*[A-Z])/, {
+      message: "Password must contain at least 1 uppercase letter.",
+    })
+    .regex(/^(?=.*[!@#$%^&*])/, {
+      message: "Password must contain at least 1 special character.",
+    })
+    .regex(/^(?=.*\d)/, {
+      message: "Password must contain at least 1 number.",
+    }),
 });
 
 export const cashInZodSchema = z.object({
@@ -81,6 +101,7 @@ export const cashInZodSchema = z.object({
     }),
   amount: z
     .number({ error: "Amount is required" })
+    .positive("Amount must be a positive number")
     .min(50, "Amount must be at least 50"),
   password: z
     .string({ error: "Password is required" })
