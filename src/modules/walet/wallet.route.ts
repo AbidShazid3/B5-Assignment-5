@@ -24,7 +24,7 @@ router.post('/cash-out',
     WalletController.cashOut);
 
 router.post('/add-money',
-    checkAuth(Role.USER),
+    checkAuth(Role.USER, Role.AGENT, Role.ADMIN),
     validateRequest(addMoneyZodSchema),
     WalletController.addMoney);
 
