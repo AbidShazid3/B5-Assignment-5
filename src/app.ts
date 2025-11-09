@@ -4,7 +4,6 @@ import cookieParser from 'cookie-parser';
 import { globalErrorHandler } from "./middlewares/globalErrorHandler";
 import notFound from "./middlewares/notFound";
 import { router } from "./routes";
-import { envVars } from "./config/env";
 
 
 const app: Application = express();
@@ -13,7 +12,7 @@ app.set("trust proxy", 1);
 app.use(express.json());
 app.use(cookieParser());
 app.use(cors({
-    origin: [envVars.FRONTEND_LIVE_URL, envVars.FRONTEND_URL],
+    origin: "https://paynex.vercel.app",
     credentials: true
 }))
 
