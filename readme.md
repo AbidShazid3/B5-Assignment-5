@@ -7,8 +7,8 @@ Supports three user roles: **User**, **Agent**, and **Admin**.
 
 ## 🚀 Live Demo
 
-🔗 **Frontend:** [https://paynex.vercel.app](#)  
-🔗 **Backend API:** [https://digital-wallet-backend-orpin.vercel.app](#)
+🔗 **Frontend:** [https://paynex.vercel.app]
+🔗 **Backend API:** [https://digital-wallet-backend-orpin.vercel.app]
 
 ---
 
