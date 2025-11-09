@@ -12,10 +12,11 @@ interface EnvConfig {
     JWT_REFRESH_EXPIRES: string,
     BCRYPT_SALT_ROUND: string,
     FRONTEND_URL: string,
+    FRONTEND_LIVE_URL: string,
 }
 
 const loadEnvVariable = (): EnvConfig => {
-    const requiredEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "JWT_ACCESS_SECRET","JWT_ACCESS_EXPIRES", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES", "BCRYPT_SALT_ROUND","FRONTEND_URL"];
+    const requiredEnvVariables: string[] = ["PORT", "DB_URL", "NODE_ENV", "JWT_ACCESS_SECRET","JWT_ACCESS_EXPIRES", "JWT_REFRESH_SECRET", "JWT_REFRESH_EXPIRES", "BCRYPT_SALT_ROUND","FRONTEND_URL", "FRONTEND_LIVE_URL"];
 
     requiredEnvVariables.forEach((key) => {
         if (!process.env[key]) {
@@ -32,6 +33,7 @@ const loadEnvVariable = (): EnvConfig => {
         JWT_REFRESH_EXPIRES: process.env.JWT_REFRESH_EXPIRES as string,
         BCRYPT_SALT_ROUND: process.env.BCRYPT_SALT_ROUND as string,
         FRONTEND_URL: process.env.FRONTEND_URL as string,
+        FRONTEND_LIVE_URL: process.env.FRONTEND_LIVE_URL as string
 
     }
 }
